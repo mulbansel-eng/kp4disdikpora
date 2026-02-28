@@ -3,115 +3,243 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard KP4 Disdikpora</title>
-    <!-- Library Essentials -->
-    <script src="https://unpkg.com"></script>
-    <script src="https://unpkg.com"></script>
-    <script src="https://unpkg.com"></script>
-    <script src="https://cdn.jsdelivr.net"></script>
+    <title>HR Analytics Dashboard - Executive Info</title>
+    <!-- Tailwind CSS for modern styling -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com" rel="stylesheet">
+    <!-- Chart.js for data visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- React and ReactDOM from CDN -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <!-- Babel for JSX transformation -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
-<body>
+<body class="bg-slate-50 text-gray-800">
     <div id="root"></div>
 
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
 
-        // --- ICONS ---
-        const IconUsers = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2""")/>><circle cx="9" cy="7" r="4""")/>><path d="M22 21v-2a4 4 0 0 0-3-3.87""")/>><path d="M16 3.13a4 4 0 0 1 0 7.75""")/>></svg>;
-        const IconBriefcase = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="14" x="2" y="7" rx="2" ry="2""")/>><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16""")/>></svg>;
-        const IconWallet = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4""")/>><path d="M3 5v14a2 2 0 0 0 2 2h16v-5""")/>><path d="M18 12a2 2 0 0 0 0 4h4v-4Z""")/>></svg>;
-        const IconActivity = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2""")/>></svg>;
+        // --- ICONS (SVG) ---
+        const IconUsers = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>;
+        const IconBriefcase = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>;
+        const IconWallet = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>;
+        const IconHeart = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>;
+        const IconActivity = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>;
 
-        // --- DATA GENERATOR ---
+        // --- MOCK DATA GENERATOR ---
         const generateMockData = () => {
             const data = [];
             const jk = ['Laki-Laki', 'Perempuan'];
+            const agama = ['Islam', 'Kristen', 'Katolik', 'Hindu', 'Buddha'];
             const status = ['PNS', 'PPPK', 'Honorer'];
-            const unit = ['Dinas Pendidikan', 'Sekretariat', 'BAPPEDA'];
-            for (let i = 0; i < 100; i++) {
+            const pangkat = ['II/a', 'II/b', 'II/c', 'II/d', 'III/a', 'III/b', 'III/c', 'III/d', 'IV/a', 'IV/b'];
+            for (let i = 0; i < 50; i++) {
                 data.push({
-                    'NAMA': `Pegawai ${i+1}`,
-                    'JENIS KELAMIN': jk[Math.floor(Math.random() * jk.length)],
-                    'STATUS KEPEGAWAIAN': status[Math.floor(Math.random() * status.length)],
-                    'UNIT KERJA': unit[Math.floor(Math.random() * unit.length)],
-                    'GAJI POKOK': Math.floor(Math.random() * 5000000) + 3000000
+                    'NAMA': `Pegawai Simulasi ${i+1}`,
+                    'JENIS KELAMIN': jk[i % 2],
+                    'AGAMA': agama[i % 5],
+                    'TANGGAL LAHIR': `19${70 + (i % 25)}-01-01`,
+                    'STATUS KEPEGAWAIAN': status[i % 3],
+                    'PANGKAT / GOL': pangkat[i % 10],
+                    'GAJI POKOK': 3000000 + (i * 100000)
                 });
             }
             return data;
         };
 
-        // --- CHART COMPONENT ---
-        const ChartComponent = ({ type, data, title }) => {
+        // --- UTILS ---
+        const cleanPangkat = (val) => val ? String(val).toUpperCase().trim().replace(/\s+/g, '') : '';
+        
+        const calculateGeneration = (dateString) => {
+            if (!dateString) return '';
+            const birthYear = new Date(dateString).getFullYear();
+            if (birthYear <= 1964) return 'Boomer (>59 th)';
+            if (birthYear <= 1980) return 'Gen X (44-59 th)';
+            if (birthYear <= 1996) return 'Millennial (28-43 th)';
+            return 'Gen Z (<=27 th)';
+        };
+
+        const groupDataByCount = (data, key, transform = (v) => v) => {
+            const counts = {};
+            data.forEach(item => {
+                let rawVal = item[key];
+                if (rawVal === undefined || rawVal === null || rawVal === '' || rawVal === '-') return;
+                let val = transform(String(rawVal).trim());
+                if (!val) return;
+                counts[val] = (counts[val] || 0) + 1;
+            });
+            return Object.entries(counts).sort((a, b) => b[1] - a[1]);
+        };
+
+        // --- COMPONENTS ---
+        const ChartComponent = ({ type, data, options, title }) => {
             const canvasRef = useRef(null);
             const chartInstance = useRef(null);
+
             useEffect(() => {
+                if (!window.Chart || !canvasRef.current) return;
                 if (chartInstance.current) chartInstance.current.destroy();
+
                 const ctx = canvasRef.current.getContext('2d');
-                chartInstance.current = new Chart(ctx, {
+                const colors = [
+                    'rgba(147, 51, 234, 0.7)', 'rgba(236, 72, 153, 0.7)', 
+                    'rgba(59, 130, 246, 0.7)', 'rgba(16, 185, 129, 0.7)', 
+                    'rgba(245, 158, 11, 0.7)', 'rgba(99, 102, 241, 0.7)'
+                ];
+
+                const chartData = { ...data };
+                if (chartData.datasets) {
+                    chartData.datasets = chartData.datasets.map((ds, i) => ({
+                        backgroundColor: ds.backgroundColor || (['pie', 'doughnut'].includes(type) ? colors : colors[i % colors.length]),
+                        borderColor: '#ffffff',
+                        borderWidth: 1,
+                        borderRadius: type === 'bar' ? 6 : 0,
+                        ...ds
+                    }));
+                }
+
+                chartInstance.current = new window.Chart(ctx, {
                     type: type,
-                    data: data,
-                    options: { responsive: true, maintainAspectRatio: false }
+                    data: chartData,
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { position: ['pie', 'doughnut'].includes(type) ? 'right' : 'top' } },
+                        ...options
+                    }
                 });
+
                 return () => chartInstance.current?.destroy();
-            }, [data]);
+            }, [data, options, type]);
+
             return (
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 h-[350px]">
-                    <h3 className="font-bold text-slate-700 mb-4">{title}</h3>
-                    <div className="relative h-64"><canvas ref={canvasRef}></canvas></div>
+                <div className="bg-white p-6 rounded-2xl shadow-sm border border-purple-50 flex flex-col h-[350px]">
+                    <h3 className="text-md font-bold text-gray-700 mb-4">{title}</h3>
+                    <div className="flex-grow relative"><canvas ref={canvasRef}></canvas></div>
                 </div>
             );
         };
 
-        // --- MAIN APP ---
-        const App = () => {
-            const [data] = useState(generateMockData());
+        function App() {
+            const [activeTab, setActiveTab] = useState('demografi');
+            const [employeeData, setEmployeeData] = useState([]);
+            const [loading, setLoading] = useState(true);
+            const [statusMsg, setStatusMsg] = useState('Mengambil data...');
 
-            const jkData = {
-                labels: ['Laki-Laki', 'Perempuan'],
-                datasets: [{ 
-                    data: [data.filter(d => d['JENIS KELAMIN'] === 'Laki-Laki').length, data.filter(d => d['JENIS KELAMIN'] === 'Perempuan').length],
-                    backgroundColor: ['#6366f1', '#ec4899']
-                }]
-            };
+            const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwcDsqULBGPwsCcGRFyxJ_YCbDgK4BNfjD03xVpP6OHGJVBOWlBHM9inUDg1_lrcpD8/exec';
+
+            useEffect(() => {
+                const fetchData = async () => {
+                    try {
+                        const response = await fetch(`${GOOGLE_SCRIPT_URL}?t=${Date.now()}`);
+                        const result = await response.json();
+                        const rawData = Array.isArray(result) ? result : (result.data || []);
+                        
+                        const actualData = rawData.filter(row => {
+                            const name = row['NAMA'] || row['Nama'];
+                            return name && String(name).trim().length > 0;
+                        });
+                        
+                        if (actualData.length > 0) {
+                            setEmployeeData(actualData);
+                            setStatusMsg(`Memuat ${actualData.length} data.`);
+                        } else {
+                            throw new Error('Data Kosong');
+                        }
+                    } catch (error) {
+                        setEmployeeData(generateMockData());
+                        setStatusMsg("Menggunakan Data Simulasi (Gagal Hubung Sheet)");
+                    } finally {
+                        setLoading(false);
+                    }
+                };
+                fetchData();
+            }, []);
+
+            if (loading) return (
+                <div className="min-h-screen bg-purple-50 flex flex-col items-center justify-center p-4">
+                    <div className="w-12 h-12 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mb-4"></div>
+                    <h2 className="text-lg font-bold text-purple-900">Menyiapkan Dashboard...</h2>
+                </div>
+            );
+
+            // Data Prep
+            const jkData = groupDataByCount(employeeData, 'JENIS KELAMIN');
+            const agamaData = groupDataByCount(employeeData, 'AGAMA');
+            const genData = groupDataByCount(employeeData, 'TANGGAL LAHIR', calculateGeneration);
+            const statusData = groupDataByCount(employeeData, 'STATUS KEPEGAWAIAN');
+            const pangkatData = groupDataByCount(employeeData, 'PANGKAT / GOL', cleanPangkat);
+
+            const tabs = [
+                { id: 'demografi', label: 'Demografi', icon: <IconUsers /> },
+                { id: 'kepegawaian', label: 'Kepegawaian', icon: <IconBriefcase /> },
+                { id: 'finansial', label: 'Finansial', icon: <IconWallet /> },
+            ];
 
             return (
-                <div className="min-h-screen p-4 md:p-8">
-                    <header className="mb-8 flex items-center gap-3">
-                        <div className="bg-indigo-600 p-2 rounded-lg text-white"><IconActivity /></div>
-                        <h1 className="text-2xl font-bold text-slate-800">Dashboard KP4 Disdikpora</h1>
+                <div className="min-h-screen flex flex-col">
+                    <header className="bg-purple-800 text-white p-6 shadow-xl">
+                        <div className="max-w-6xl mx-auto flex justify-between items-center">
+                            <div>
+                                <h1 className="text-xl font-black uppercase tracking-tight">SDM Dashboard</h1>
+                                <p className="text-purple-200 text-xs">{statusMsg}</p>
+                            </div>
+                            <div className="bg-white/10 px-4 py-1 rounded-full border border-white/20">
+                                <span className="font-bold">{employeeData.length}</span> Pegawai
+                            </div>
+                        </div>
                     </header>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                        <div className="bg-white p-6 rounded-xl shadow-sm border-l-4 border-indigo-500">
-                            <div className="text-slate-500 text-sm flex items-center gap-2"><IconUsers /> Total Pegawai</div>
-                            <div className="text-3xl font-bold mt-1 text-slate-800">{data.length}</div>
-                        </div>
-                    </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <ChartComponent type="pie" data={jkData} title="Distribusi Jenis Kelamin" />
-                        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 overflow-auto max-h-[350px]">
-                            <h3 className="font-bold text-slate-700 mb-4">Daftar Pegawai</h3>
-                            <table className="w-full text-sm text-left">
-                                <thead className="text-xs text-slate-500 uppercase bg-slate-50">
-                                    <tr><th className="px-4 py-2">Nama</th><th className="px-4 py-2">Unit</th></tr>
-                                </thead>
-                                <tbody>
-                                    {data.slice(0, 10).map((p, i) => (
-                                        <tr key={i} className="border-b"><td className="px-4 py-2">{p.NAMA}</td><td className="px-4 py-2">{p['UNIT KERJA']}</td></tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                    <main className="max-w-6xl mx-auto p-4 lg:p-8 flex-grow w-full">
+                        <div className="flex gap-2 mb-8 overflow-x-auto pb-2 scrollbar-hide">
+                            {tabs.map(t => (
+                                <button key={t.id} onClick={() => setActiveTab(t.id)}
+                                    className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-bold transition-all ${activeTab === t.id ? 'bg-purple-600 text-white shadow-lg shadow-purple-200' : 'bg-white text-gray-500 hover:bg-gray-100'}`}
+                                >
+                                    {t.icon} {t.label}
+                                </button>
+                            ))}
                         </div>
-                    </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {activeTab === 'demografi' && (
+                                <>
+                                    <ChartComponent title="Jenis Kelamin" type="doughnut" data={{ labels: jkData.map(d => d[0]), datasets: [{ data: jkData.map(d => d[1]) }] }} />
+                                    <ChartComponent title="Agama" type="bar" data={{ labels: agamaData.map(d => d[0]), datasets: [{ label: 'Orang', data: agamaData.map(d => d[1]) }] }} options={{ indexAxis: 'y' }} />
+                                    <ChartComponent title="Kelompok Usia" type="bar" data={{ labels: genData.map(d => d[0]), datasets: [{ label: 'Orang', data: genData.map(d => d[1]) }] }} />
+                                </>
+                            )}
+                            {activeTab === 'kepegawaian' && (
+                                <>
+                                    <ChartComponent title="Status Kepegawaian" type="pie" data={{ labels: statusData.map(d => d[0]), datasets: [{ data: statusData.map(d => d[1]) }] }} />
+                                    <ChartComponent title="Pangkat / Golongan" type="bar" data={{ labels: pangkatData.map(d => d[0]), datasets: [{ label: 'SDM', data: pangkatData.map(d => d[1]) }] }} />
+                                </>
+                            )}
+                            {activeTab === 'finansial' && (
+                                <div className="bg-white p-12 rounded-2xl shadow-sm border border-purple-100 text-center md:col-span-2">
+                                    <h3 className="text-purple-800 font-bold mb-4">Total Anggaran Gaji Pokok</h3>
+                                    <div className="text-4xl font-black text-purple-900">
+                                        Rp {employeeData.reduce((acc, curr) => acc + (parseInt(String(curr['GAJI POKOK']).replace(/\D/g, '')) || 0), 0).toLocaleString('id-ID')}
+                                    </div>
+                                    <p className="text-xs text-gray-400 mt-4 uppercase tracking-widest font-bold">Data Real Time dari Database</p>
+                                </div>
+                            )}
+                        </div>
+                    </main>
+
+                    <footer className="p-6 text-center text-gray-400 text-xs">
+                        Dashboard Analytics Pegawai &copy; 2024
+                    </footer>
                 </div>
             );
-        };
+        }
 
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
