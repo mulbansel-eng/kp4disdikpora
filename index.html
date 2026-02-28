@@ -3,23 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aplikasi Saya</title>
-    <!-- Library Inti -->
+    <title>Aplikasi Ku</title>
     <script src="https://unpkg.com"></script>
     <script src="https://unpkg.com"></script>
     <script src="https://unpkg.com"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Tambahan Library Icon & Grafik (Sering dipakai Gemini) -->
+    <!-- Library tambahan agar tidak error jika kode pakai icon/grafik -->
     <script src="https://cdn.jsdelivr.net"></script>
     <script src="https://cdn.jsdelivr.net"></script>
 </head>
 <body>
     <div id="root"></div>
 
-    <!-- Area untuk Paste Kode -->
-    <script id="gemini-code" type="text/plain">
-import React, { useState, useEffect, useRef } from 'react';
+    <script type="text/babel">
+        // Persiapan library agar bisa dipakai kode Gemini
+        const { useState, useEffect, useRef, useMemo } = React;
+        window.Lucide = window.lucide; // Alias untuk Lucide Icons
 
+       
 // --- ICONS (SVG Mocks for standard Lucide icons to keep it dependency-free) ---
 const IconUsers = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>;
 const IconBriefcase = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>;
@@ -177,7 +178,7 @@ const ChartComponent = ({ type, data, options, title }) => {
 };
 
 // --- MAIN APP COMPONENT ---
-export default function App() {
+ default function App() {
     const [activeTab, setActiveTab] = useState('demografi');
     const [employeeData, setEmployeeData] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -511,43 +512,37 @@ export default function App() {
         </div>
     );
 }
-    </script>
 
-    <script type="text/babel">
-        // 1. Ambil kode mentah dan bersihkan dari 'import' & 'export' yang bikin error
-        let rawCode = document.getElementById('gemini-code').innerHTML;
-        const cleanedCode = rawCode
-            .replace(/import\s+[\s\S]*?from\s+['"].*?['"];?/g, '') // Hapus import
-            .replace(/export\s+default\s+/g, 'const MainApp = ')   // Ubah export jadi variabel
-            .replace(/export\s+/g, '');                           // Hapus export lainnya
-
-        // 2. Siapkan Environment React
-        const { useState, useEffect, useRef, useMemo } = React;
-        const { 
-            LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, 
-            BarChart, Bar, PieChart, Pie, Cell 
-        } = window.Recharts || {};
-
-        // 3. Jalankan kode yang sudah dibersihkan
+        // OTOMATIS MENCARI FUNGSI UTAMA
         try {
-            eval(Babel.transform(cleanedCode, { presets: ['react'] }).code);
-            
-            // Cari komponen untuk di-render
-            const ComponentToRender = (typeof MainApp !== 'undefined') ? MainApp : 
-                                     (typeof App !== 'undefined') ? App : 
-                                     (typeof Dashboard !== 'undefined') ? Dashboard : null;
+            // Daftar nama fungsi yang sering dipakai Gemini
+            const potentialNames = ['App', 'Dashboard', 'LandingPage', 'HealthDashboard', 'FinancialTracker'];
+            let ComponentToRender = null;
+
+            // Cari dari daftar di atas
+            for (let name of potentialNames) {
+                if (typeof window[name] === 'function') { ComponentToRender = window[name]; break; }
+            }
+
+            // Jika masih tidak ketemu, ambil fungsi terakhir yang didefinisikan (paling bawah)
+            if (!ComponentToRender) {
+                const keys = Object.keys(window);
+                for (let i = keys.length - 1; i >= 0; i--) {
+                    if (typeof window[keys[i]] === 'function' && /^[A-Z]/.test(keys[i])) {
+                        ComponentToRender = window[keys[i]];
+                        break;
+                    }
+                }
+            }
 
             if (ComponentToRender) {
                 const root = ReactDOM.createRoot(document.getElementById('root'));
                 root.render(<ComponentToRender />);
             } else {
-                throw new Error("Komponen utama (App/Dashboard) tidak ditemukan.");
+                document.getElementById('root').innerHTML = "<div style='padding:20px'>Aplikasi siap, tapi fungsi utama tidak ditemukan. Pastikan Anda sudah mem-paste kode.</div>";
             }
-        } catch (err) {
-            console.error(err);
-            document.getElementById('root').innerHTML = `<div style="padding:20px; color:red;">
-                <b>Error:</b> ${err.message}<br/><small>Cek Console (F12) untuk detail.</small>
-            </div>`;
+        } catch (e) {
+            console.error("Render Error:", e);
         }
     </script>
 </body>
