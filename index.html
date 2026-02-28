@@ -3,23 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Application</title>
-    <!-- Library so that React and Graphics can run automatically -->
+    <title>Aplikasi Saya</title>
+    <!-- Library Inti -->
     <script src="https://unpkg.com"></script>
     <script src="https://unpkg.com"></script>
     <script src="https://unpkg.com"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Tambahan Library Icon & Grafik (Sering dipakai Gemini) -->
     <script src="https://cdn.jsdelivr.net"></script>
-    <style>body { margin: 0; padding: 0; background: #f3f4f6; }</style>
+    <script src="https://cdn.jsdelivr.net"></script>
 </head>
 <body>
     <div id="root"></div>
 
-    <script type="text/babel">
-        // Automatically recognizes React functions even if they are pasted raw
-        const { useState, useEffect, useRef, useMemo } = React;
+    <!-- Area untuk Paste Kode -->
+    <script id="gemini-code" type="text/plain">
+import React, { useState, useEffect, useRef } from 'react';
 
-       
 // --- ICONS (SVG Mocks for standard Lucide icons to keep it dependency-free) ---
 const IconUsers = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>;
 const IconBriefcase = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>;
@@ -511,21 +511,43 @@ export default function App() {
         </div>
     );
 }
+    </script>
 
-        // This script will try to find the main component (App or Dashboard) and display it
+    <script type="text/babel">
+        // 1. Ambil kode mentah dan bersihkan dari 'import' & 'export' yang bikin error
+        let rawCode = document.getElementById('gemini-code').innerHTML;
+        const cleanedCode = rawCode
+            .replace(/import\s+[\s\S]*?from\s+['"].*?['"];?/g, '') // Hapus import
+            .replace(/export\s+default\s+/g, 'const MainApp = ')   // Ubah export jadi variabel
+            .replace(/export\s+/g, '');                           // Hapus export lainnya
+
+        // 2. Siapkan Environment React
+        const { useState, useEffect, useRef, useMemo } = React;
+        const { 
+            LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, 
+            BarChart, Bar, PieChart, Pie, Cell 
+        } = window.Recharts || {};
+
+        // 3. Jalankan kode yang sudah dibersihkan
         try {
-            const MainComponent = (typeof App !== 'undefined') ? App : 
-                                 (typeof Dashboard !== 'undefined') ? Dashboard : null;
+            eval(Babel.transform(cleanedCode, { presets: ['react'] }).code);
             
-            if (MainComponent) {
+            // Cari komponen untuk di-render
+            const ComponentToRender = (typeof MainApp !== 'undefined') ? MainApp : 
+                                     (typeof App !== 'undefined') ? App : 
+                                     (typeof Dashboard !== 'undefined') ? Dashboard : null;
+
+            if (ComponentToRender) {
                 const root = ReactDOM.createRoot(document.getElementById('root'));
-                root.render(<MainComponent />);
+                root.render(<ComponentToRender />);
             } else {
-                document.getElementById('root').innerHTML = "<div style='padding:20px'>Error: The main component (App/Dashboard) was not found. Make sure the code is correct.</div>";
+                throw new Error("Komponen utama (App/Dashboard) tidak ditemukan.");
             }
-        } catch (e) {
-            console.error(e);
-            document.getElementById('root').innerHTML = "<div style='padding:20px'>An error occurred while loading the application. Check the Console (F12).</div>";
+        } catch (err) {
+            console.error(err);
+            document.getElementById('root').innerHTML = `<div style="padding:20px; color:red;">
+                <b>Error:</b> ${err.message}<br/><small>Cek Console (F12) untuk detail.</small>
+            </div>`;
         }
     </script>
 </body>
