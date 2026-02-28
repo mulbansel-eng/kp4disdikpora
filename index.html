@@ -1,5 +1,24 @@
-import React, { useState, useEffect, useRef } from 'react';
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplikasi Dashboard</title>
+    <!-- Library pendukung agar kode React & Chart bisa jalan -->
+    <script src="https://unpkg.com"></script>
+    <script src="https://unpkg.com"></script>
+    <script src="https://unpkg.com"></script>
+    <script src="https://cdn.jsdelivr.net"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+    <div id="root"></div>
 
+    <script type="text/babel">
+        // Mengubah import menjadi variabel global agar tidak error
+        const { useState, useEffect, useRef } = React;
+
+       
 // --- ICONS (SVG Mocks for standard Lucide icons to keep it dependency-free) ---
 const IconUsers = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>;
 const IconBriefcase = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>;
@@ -491,3 +510,12 @@ export default function App() {
         </div>
     );
 }
+
+        // Menjalankan aplikasi secara otomatis
+        // Pastikan di dalam kode yang Anda paste ada fungsi bernama "App" atau "Dashboard"
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        // Jika nama fungsinya bukan App (misal: Dashboard), ganti <App /> di bawah ini
+        root.render(<App />); 
+    </script>
+</body>
+</html>
