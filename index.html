@@ -1,248 +1,493 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HR Analytics Dashboard - Executive Info</title>
-    <!-- Tailwind CSS for modern styling -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Chart.js for data visualization -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- React and ReactDOM from CDN -->
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <!-- Babel for JSX transformation -->
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-        body { font-family: 'Inter', sans-serif; }
-        .scrollbar-hide::-webkit-scrollbar { display: none; }
-        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-    </style>
-</head>
-<body class="bg-slate-50 text-gray-800">
-    <div id="root"></div>
+import React, { useState, useEffect, useRef } from 'react';
 
-    <script type="text/babel">
-        const { useState, useEffect, useRef } = React;
+// --- ICONS (SVG Mocks for standard Lucide icons to keep it dependency-free) ---
+const IconUsers = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>;
+const IconBriefcase = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>;
+const IconWallet = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>;
+const IconHeart = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>;
+const IconActivity = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>;
 
-        // --- ICONS (SVG) ---
-        const IconUsers = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>;
-        const IconBriefcase = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>;
-        const IconWallet = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>;
-        const IconHeart = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>;
-        const IconActivity = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>;
+// --- MOCK DATA GENERATOR (Fallback) ---
+const generateMockData = () => {
+  const data = [];
+  const jk = ['Laki-Laki', 'Perempuan'];
+  const agama = ['Islam', 'Kristen', 'Katolik', 'Hindu', 'Buddha'];
+  const status = ['PNS', 'PPPK', 'Honorer'];
+  const pangkat = ['II/a', 'II/b', 'II/c', 'II/d', 'III/a', 'III/b', 'III/c', 'III/d', 'IV/a', 'IV/b'];
+  const jabatan = ['Struktural', 'Fungsional Umum', 'Fungsional Tertentu'];
+  const unitKerja = ['Dinas Pendidikan', 'Dinas Kesehatan', 'Dinas PU', 'Sekretariat Daerah', 'BAPPEDA'];
+  const kecamatan = ['Kecamatan A', 'Kecamatan B', 'Kecamatan C', 'Kecamatan D', 'Kecamatan E'];
+  const statusKawin = ['Menikah', 'Belum Menikah', 'Cerai Hidup', 'Cerai Mati'];
+  const pekerjaanPasangan = ['PNS', 'Swasta', 'Wiraswasta', 'Ibu Rumah Tangga', 'TNI/Polri', 'Tidak Bekerja'];
 
-        // --- MOCK DATA GENERATOR ---
-        const generateMockData = () => {
-            const data = [];
-            const jk = ['Laki-Laki', 'Perempuan'];
-            const agama = ['Islam', 'Kristen', 'Katolik', 'Hindu', 'Buddha'];
-            const status = ['PNS', 'PPPK', 'Honorer'];
-            const pangkat = ['II/a', 'II/b', 'II/c', 'II/d', 'III/a', 'III/b', 'III/c', 'III/d', 'IV/a', 'IV/b'];
-            for (let i = 0; i < 50; i++) {
-                data.push({
-                    'NAMA': `Pegawai Simulasi ${i+1}`,
-                    'JENIS KELAMIN': jk[i % 2],
-                    'AGAMA': agama[i % 5],
-                    'TANGGAL LAHIR': `19${70 + (i % 25)}-01-01`,
-                    'STATUS KEPEGAWAIAN': status[i % 3],
-                    'PANGKAT / GOL': pangkat[i % 10],
-                    'GAJI POKOK': 3000000 + (i * 100000)
-                });
-            }
-            return data;
-        };
+  for (let i = 0; i < 250; i++) {
+    const isMenikah = Math.random() > 0.3;
+    const baseGaji = Math.floor(Math.random() * 5000000) + 3000000;
+    
+    // Generate random birthdate between 1965 and 2000
+    const start = new Date(1965, 0, 1);
+    const end = new Date(2000, 11, 31);
+    const tglLahir = new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
 
-        // --- UTILS ---
-        const cleanPangkat = (val) => val ? String(val).toUpperCase().trim().replace(/\s+/g, '') : '';
-        
-        const calculateGeneration = (dateString) => {
-            if (!dateString) return '';
-            const birthYear = new Date(dateString).getFullYear();
-            if (birthYear <= 1964) return 'Boomer (>59 th)';
-            if (birthYear <= 1980) return 'Gen X (44-59 th)';
-            if (birthYear <= 1996) return 'Millennial (28-43 th)';
-            return 'Gen Z (<=27 th)';
-        };
+    data.push({
+      'NAMA': `Pegawai ${i+1}`,
+      'JENIS KELAMIN': jk[Math.floor(Math.random() * jk.length)],
+      'AGAMA': agama[Math.floor(Math.random() * agama.length)],
+      'TANGGAL LAHIR': tglLahir.toISOString(), // ISO string format
+      'KECAMATAN': kecamatan[Math.floor(Math.random() * kecamatan.length)],
+      'STATUS KEPEGAWAIAN': status[Math.floor(Math.random() * status.length)],
+      'PANGKAT / GOL': pangkat[Math.floor(Math.random() * pangkat.length)],
+      'JABATAN STRUKTURAL/FUNGSIONAL': jabatan[Math.floor(Math.random() * jabatan.length)],
+      'UNIT KERJA': unitKerja[Math.floor(Math.random() * unitKerja.length)],
+      'GAJI POKOK': baseGaji,
+      'STATUS PERKAWINAN': statusKawin[Math.floor(Math.random() * statusKawin.length)],
+      'Jumlah Anak Seluruhnya': isMenikah ? Math.floor(Math.random() * 4).toString() : '0',
+      'Pekerjaan Suami/Istri': isMenikah ? pekerjaanPasangan[Math.floor(Math.random() * pekerjaanPasangan.length)] : '-'
+    });
+  }
+  return data;
+};
 
-        const groupDataByCount = (data, key, transform = (v) => v) => {
-            const counts = {};
-            data.forEach(item => {
-                let rawVal = item[key];
-                if (rawVal === undefined || rawVal === null || rawVal === '' || rawVal === '-') return;
-                let val = transform(String(rawVal).trim());
-                if (!val) return;
-                counts[val] = (counts[val] || 0) + 1;
-            });
-            return Object.entries(counts).sort((a, b) => b[1] - a[1]);
-        };
+// --- DATA PROCESSING UTILS ---
+const cleanPangkat = (val) => {
+    if (!val) return '';
+    return String(val).toUpperCase().replace(/\s+/g, '');
+};
 
-        // --- COMPONENTS ---
-        const ChartComponent = ({ type, data, options, title }) => {
-            const canvasRef = useRef(null);
-            const chartInstance = useRef(null);
+const calculateGeneration = (dateString) => {
+    if (!dateString) return '';
+    const birthYear = new Date(dateString).getFullYear();
+    const currentYear = new Date().getFullYear();
+    const age = currentYear - birthYear;
+    
+    if (age <= 27) return 'Gen Z (<=27 th)';
+    if (age >= 28 && age <= 43) return 'Millennial (28-43 th)';
+    if (age >= 44 && age <= 59) return 'Gen X (44-59 th)';
+    return 'Boomer (>59 th)';
+};
 
-            useEffect(() => {
-                if (!window.Chart || !canvasRef.current) return;
-                if (chartInstance.current) chartInstance.current.destroy();
+const groupDataByCount = (data, key, transform = (v) => v) => {
+    const counts = {};
+    data.forEach(item => {
+        let val = item[key];
+        val = transform(val);
+        if (val === undefined || val === null || val === '' || val === '-') return;
+        counts[val] = (counts[val] || 0) + 1;
+    });
+    // Sort descending by value for better visualization
+    return Object.entries(counts).sort((a, b) => b[1] - a[1]);
+};
 
-                const ctx = canvasRef.current.getContext('2d');
-                const colors = [
-                    'rgba(147, 51, 234, 0.7)', 'rgba(236, 72, 153, 0.7)', 
-                    'rgba(59, 130, 246, 0.7)', 'rgba(16, 185, 129, 0.7)', 
-                    'rgba(245, 158, 11, 0.7)', 'rgba(99, 102, 241, 0.7)'
-                ];
+// --- CHART COMPONENT ---
+const ChartComponent = ({ type, data, options, title }) => {
+    const canvasRef = useRef(null);
+    const chartInstance = useRef(null);
 
-                const chartData = { ...data };
-                if (chartData.datasets) {
-                    chartData.datasets = chartData.datasets.map((ds, i) => ({
-                        backgroundColor: ds.backgroundColor || (['pie', 'doughnut'].includes(type) ? colors : colors[i % colors.length]),
-                        borderColor: '#ffffff',
-                        borderWidth: 1,
-                        borderRadius: type === 'bar' ? 6 : 0,
-                        ...ds
-                    }));
-                }
+    useEffect(() => {
+        if (!window.Chart || !canvasRef.current) return;
 
-                chartInstance.current = new window.Chart(ctx, {
-                    type: type,
-                    data: chartData,
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: { legend: { position: ['pie', 'doughnut'].includes(type) ? 'right' : 'top' } },
-                        ...options
-                    }
-                });
-
-                return () => chartInstance.current?.destroy();
-            }, [data, options, type]);
-
-            return (
-                <div className="bg-white p-6 rounded-2xl shadow-sm border border-purple-50 flex flex-col h-[350px]">
-                    <h3 className="text-md font-bold text-gray-700 mb-4">{title}</h3>
-                    <div className="flex-grow relative"><canvas ref={canvasRef}></canvas></div>
-                </div>
-            );
-        };
-
-        function App() {
-            const [activeTab, setActiveTab] = useState('demografi');
-            const [employeeData, setEmployeeData] = useState([]);
-            const [loading, setLoading] = useState(true);
-            const [statusMsg, setStatusMsg] = useState('Mengambil data...');
-
-            const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwcDsqULBGPwsCcGRFyxJ_YCbDgK4BNfjD03xVpP6OHGJVBOWlBHM9inUDg1_lrcpD8/exec';
-
-            useEffect(() => {
-                const fetchData = async () => {
-                    try {
-                        const response = await fetch(`${GOOGLE_SCRIPT_URL}?t=${Date.now()}`);
-                        const result = await response.json();
-                        const rawData = Array.isArray(result) ? result : (result.data || []);
-                        
-                        const actualData = rawData.filter(row => {
-                            const name = row['NAMA'] || row['Nama'];
-                            return name && String(name).trim().length > 0;
-                        });
-                        
-                        if (actualData.length > 0) {
-                            setEmployeeData(actualData);
-                            setStatusMsg(`Memuat ${actualData.length} data.`);
-                        } else {
-                            throw new Error('Data Kosong');
-                        }
-                    } catch (error) {
-                        setEmployeeData(generateMockData());
-                        setStatusMsg("Menggunakan Data Simulasi (Gagal Hubung Sheet)");
-                    } finally {
-                        setLoading(false);
-                    }
-                };
-                fetchData();
-            }, []);
-
-            if (loading) return (
-                <div className="min-h-screen bg-purple-50 flex flex-col items-center justify-center p-4">
-                    <div className="w-12 h-12 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mb-4"></div>
-                    <h2 className="text-lg font-bold text-purple-900">Menyiapkan Dashboard...</h2>
-                </div>
-            );
-
-            // Data Prep
-            const jkData = groupDataByCount(employeeData, 'JENIS KELAMIN');
-            const agamaData = groupDataByCount(employeeData, 'AGAMA');
-            const genData = groupDataByCount(employeeData, 'TANGGAL LAHIR', calculateGeneration);
-            const statusData = groupDataByCount(employeeData, 'STATUS KEPEGAWAIAN');
-            const pangkatData = groupDataByCount(employeeData, 'PANGKAT / GOL', cleanPangkat);
-
-            const tabs = [
-                { id: 'demografi', label: 'Demografi', icon: <IconUsers /> },
-                { id: 'kepegawaian', label: 'Kepegawaian', icon: <IconBriefcase /> },
-                { id: 'finansial', label: 'Finansial', icon: <IconWallet /> },
-            ];
-
-            return (
-                <div className="min-h-screen flex flex-col">
-                    <header className="bg-purple-800 text-white p-6 shadow-xl">
-                        <div className="max-w-6xl mx-auto flex justify-between items-center">
-                            <div>
-                                <h1 className="text-xl font-black uppercase tracking-tight">SDM Dashboard</h1>
-                                <p className="text-purple-200 text-xs">{statusMsg}</p>
-                            </div>
-                            <div className="bg-white/10 px-4 py-1 rounded-full border border-white/20">
-                                <span className="font-bold">{employeeData.length}</span> Pegawai
-                            </div>
-                        </div>
-                    </header>
-
-                    <main className="max-w-6xl mx-auto p-4 lg:p-8 flex-grow w-full">
-                        <div className="flex gap-2 mb-8 overflow-x-auto pb-2 scrollbar-hide">
-                            {tabs.map(t => (
-                                <button key={t.id} onClick={() => setActiveTab(t.id)}
-                                    className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-bold transition-all ${activeTab === t.id ? 'bg-purple-600 text-white shadow-lg shadow-purple-200' : 'bg-white text-gray-500 hover:bg-gray-100'}`}
-                                >
-                                    {t.icon} {t.label}
-                                </button>
-                            ))}
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            {activeTab === 'demografi' && (
-                                <>
-                                    <ChartComponent title="Jenis Kelamin" type="doughnut" data={{ labels: jkData.map(d => d[0]), datasets: [{ data: jkData.map(d => d[1]) }] }} />
-                                    <ChartComponent title="Agama" type="bar" data={{ labels: agamaData.map(d => d[0]), datasets: [{ label: 'Orang', data: agamaData.map(d => d[1]) }] }} options={{ indexAxis: 'y' }} />
-                                    <ChartComponent title="Kelompok Usia" type="bar" data={{ labels: genData.map(d => d[0]), datasets: [{ label: 'Orang', data: genData.map(d => d[1]) }] }} />
-                                </>
-                            )}
-                            {activeTab === 'kepegawaian' && (
-                                <>
-                                    <ChartComponent title="Status Kepegawaian" type="pie" data={{ labels: statusData.map(d => d[0]), datasets: [{ data: statusData.map(d => d[1]) }] }} />
-                                    <ChartComponent title="Pangkat / Golongan" type="bar" data={{ labels: pangkatData.map(d => d[0]), datasets: [{ label: 'SDM', data: pangkatData.map(d => d[1]) }] }} />
-                                </>
-                            )}
-                            {activeTab === 'finansial' && (
-                                <div className="bg-white p-12 rounded-2xl shadow-sm border border-purple-100 text-center md:col-span-2">
-                                    <h3 className="text-purple-800 font-bold mb-4">Total Anggaran Gaji Pokok</h3>
-                                    <div className="text-4xl font-black text-purple-900">
-                                        Rp {employeeData.reduce((acc, curr) => acc + (parseInt(String(curr['GAJI POKOK']).replace(/\D/g, '')) || 0), 0).toLocaleString('id-ID')}
-                                    </div>
-                                    <p className="text-xs text-gray-400 mt-4 uppercase tracking-widest font-bold">Data Real Time dari Database</p>
-                                </div>
-                            )}
-                        </div>
-                    </main>
-
-                    <footer className="p-6 text-center text-gray-400 text-xs">
-                        Dashboard Analytics Pegawai &copy; 2024
-                    </footer>
-                </div>
-            );
+        // Destroy previous instance
+        if (chartInstance.current) {
+            chartInstance.current.destroy();
         }
 
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
-    </script>
-</body>
-</html>
+        const ctx = canvasRef.current.getContext('2d');
+        
+        // Theme colors
+        const colors = [
+            'rgba(147, 51, 234, 0.8)', // purple-600
+            'rgba(236, 72, 153, 0.8)', // pink-500
+            'rgba(59, 130, 246, 0.8)', // blue-500
+            'rgba(16, 185, 129, 0.8)', // emerald-500
+            'rgba(245, 158, 11, 0.8)', // amber-500
+            'rgba(99, 102, 241, 0.8)', // indigo-500
+            'rgba(20, 184, 166, 0.8)', // teal-500
+        ];
+
+        const defaultOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: type === 'pie' || type === 'doughnut' ? 'right' : 'top',
+                    labels: { font: { family: "'Inter', sans-serif", size: 12 } }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(17, 24, 39, 0.9)',
+                    titleFont: { family: "'Inter', sans-serif" },
+                    bodyFont: { family: "'Inter', sans-serif" },
+                    padding: 12,
+                    cornerRadius: 8,
+                }
+            },
+            ...options
+        };
+
+        // Apply theme colors if not explicitly provided
+        const chartData = { ...data };
+        if (chartData.datasets) {
+            chartData.datasets = chartData.datasets.map((ds, i) => ({
+                backgroundColor: ds.backgroundColor || (type === 'pie' || type === 'doughnut' || type === 'polarArea' ? colors : colors[i % colors.length]),
+                borderColor: ds.borderColor || (type === 'pie' || type === 'doughnut' ? '#ffffff' : colors[i % colors.length].replace('0.8', '1')),
+                borderWidth: ds.borderWidth || 1,
+                borderRadius: type === 'bar' ? 4 : 0,
+                ...ds
+            }));
+        }
+
+        chartInstance.current = new window.Chart(ctx, {
+            type: type,
+            data: chartData,
+            options: defaultOptions
+        });
+
+        return () => {
+            if (chartInstance.current) chartInstance.current.destroy();
+        };
+    }, [data, options, type]);
+
+    return (
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-purple-100 flex flex-col h-[400px] transition-all duration-300 hover:shadow-md">
+            <h3 className="text-lg font-semibold text-gray-800 mb-4 font-sans">{title}</h3>
+            <div className="flex-grow relative w-full h-full">
+                <canvas ref={canvasRef}></canvas>
+            </div>
+        </div>
+    );
+};
+
+// --- MAIN APP COMPONENT ---
+export default function App() {
+    const [activeTab, setActiveTab] = useState('demografi');
+    const [employeeData, setEmployeeData] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [chartJsLoaded, setChartJsLoaded] = useState(false);
+    const [dataSourceMode, setDataSourceMode] = useState('loading'); // 'live', 'mock', 'loading'
+
+    const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwcDsqULBGPwsCcGRFyxJ_YCbDgK4BNfjD03xVpP6OHGJVBOWlBHM9inUDg1_lrcpD8/exec';
+
+    // 1. Load Chart.js dynamically
+    useEffect(() => {
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/chart.js';
+        script.async = true;
+        script.onload = () => setChartJsLoaded(true);
+        document.body.appendChild(script);
+        return () => document.body.removeChild(script);
+    }, []);
+
+    // 2. Fetch Data
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                // Attempt to fetch from real URL
+                const response = await fetch(GOOGLE_SCRIPT_URL);
+                if (!response.ok) throw new Error('Network response was not ok');
+                const result = await response.json();
+                
+                // Gas usually returns {data: []} or just []
+                const parsedData = Array.isArray(result) ? result : (result.data || []);
+                
+                if (parsedData.length > 0) {
+                    setEmployeeData(parsedData);
+                    setDataSourceMode('live');
+                } else {
+                    throw new Error('Data empty or format incorrect');
+                }
+            } catch (error) {
+                console.warn("Gagal mengambil data Live. Menggunakan Data Mock (Simulasi).", error);
+                // Fallback to mock data immediately to ensure UI works
+                setEmployeeData(generateMockData());
+                setDataSourceMode('mock');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchData();
+    }, []);
+
+    if (loading || !chartJsLoaded) {
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-purple-50 to-white flex flex-col items-center justify-center">
+                <IconActivity className="w-12 h-12 text-purple-600 animate-spin mb-4" />
+                <h2 className="text-xl font-semibold text-gray-800">Menyiapkan Dashboard...</h2>
+                <p className="text-gray-500">Mengambil dan memproses data pegawai</p>
+            </div>
+        );
+    }
+
+    // --- PREPARE DATA FOR CHARTS ---
+
+    // Kategori 1: Demografi
+    const jkData = groupDataByCount(employeeData, 'JENIS KELAMIN');
+    const agamaData = groupDataByCount(employeeData, 'AGAMA');
+    const generasiData = groupDataByCount(employeeData, 'TANGGAL LAHIR', calculateGeneration);
+    const domisiliData = groupDataByCount(employeeData, 'KECAMATAN'); // Substitute for Treemap
+
+    // Kategori 2: Kepegawaian
+    const statusPegawaiData = groupDataByCount(employeeData, 'STATUS KEPEGAWAIAN');
+    // For Pangkat, sort alphabetically (II/a -> IV/e)
+    let pangkatData = groupDataByCount(employeeData, 'PANGKAT / GOL', cleanPangkat);
+    pangkatData.sort((a, b) => a[0].localeCompare(b[0])); 
+    const jabatanData = groupDataByCount(employeeData, 'JABATAN STRUKTURAL/FUNGSIONAL'); // Substitute for Funnel
+    const unitKerjaData = groupDataByCount(employeeData, 'UNIT KERJA');
+
+    // Kategori 3: Finansial
+    // Group salary into ranges for Histogram
+    const salaryRanges = { '< 2 Jt': 0, '2 - 4 Jt': 0, '4 - 6 Jt': 0, '> 6 Jt': 0 };
+    const scatterDataRaw = [];
+    const pangkatHierarchy = {'II/a':1, 'II/b':2, 'II/c':3, 'II/d':4, 'III/a':5, 'III/b':6, 'III/c':7, 'III/d':8, 'IV/a':9, 'IV/b':10};
+
+    employeeData.forEach(emp => {
+        let gaji = String(emp['GAJI POKOK'] || '0').replace(/[^0-9]/g, '');
+        gaji = parseInt(gaji, 10) || 0;
+        
+        if (gaji < 2000000) salaryRanges['< 2 Jt']++;
+        else if (gaji < 4000000) salaryRanges['2 - 4 Jt']++;
+        else if (gaji < 6000000) salaryRanges['4 - 6 Jt']++;
+        else salaryRanges['> 6 Jt']++;
+
+        const pkat = cleanPangkat(emp['PANGKAT / GOL']);
+        if (pkat) {
+            scatterDataRaw.push({
+                x: pangkatHierarchy[pkat] || 0,
+                y: gaji,
+                pangkatLabel: pkat
+            });
+        }
+    });
+
+    // Kategori 4: Keluarga
+    const kawinData = groupDataByCount(employeeData, 'STATUS PERKAWINAN');
+    const jmlAnakData = groupDataByCount(employeeData, 'Jumlah Anak Seluruhnya');
+    const pekerjaanPasanganData = groupDataByCount(employeeData, 'Pekerjaan Suami/Istri');
+
+
+    // --- TABS CONFIGURATION ---
+    const tabs = [
+        { id: 'demografi', label: 'Profil & Demografi', icon: <IconUsers /> },
+        { id: 'kepegawaian', label: 'Struktur & Status', icon: <IconBriefcase /> },
+        { id: 'finansial', label: 'Finansial & Kesejahteraan', icon: <IconWallet /> },
+        { id: 'keluarga', label: 'Profil Sosial / Keluarga', icon: <IconHeart /> },
+    ];
+
+    return (
+        <div className="min-h-screen bg-slate-50 font-sans text-gray-800">
+            {/* TOP NAVIGATION / HEADER */}
+            <header className="bg-gradient-to-r from-purple-800 to-purple-600 text-white shadow-lg">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+                    <div className="flex justify-between items-center">
+                        <div>
+                            <h1 className="text-2xl font-bold tracking-tight">HR Analytics Dashboard</h1>
+                            <p className="text-purple-200 text-sm mt-1">Sistem Informasi Kepegawaian Eksekutif</p>
+                        </div>
+                        <div className="text-right hidden sm:block">
+                            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-purple-900 text-purple-100">
+                                Total Pegawai: {employeeData.length}
+                            </span>
+                            {dataSourceMode === 'mock' && (
+                                <p className="text-xs text-yellow-300 mt-1">*Menampilkan Data Simulasi</p>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                
+                {/* TABS */}
+                <div className="flex overflow-x-auto border-b border-gray-200 mb-8 pb-2 scrollbar-hide">
+                    {tabs.map(tab => (
+                        <button
+                            key={tab.id}
+                            onClick={() => setActiveTab(tab.id)}
+                            className={`flex items-center gap-2 py-2 px-4 whitespace-nowrap border-b-2 font-medium text-sm transition-colors duration-200 ${
+                                activeTab === tab.id 
+                                ? 'border-purple-600 text-purple-700 bg-purple-50 rounded-t-lg' 
+                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                            }`}
+                        >
+                            {tab.icon}
+                            {tab.label}
+                        </button>
+                    ))}
+                </div>
+
+                {/* CONTENT AREA */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+                    
+                    {/* --- KATEGORI 1: DEMOGRAFI --- */}
+                    {activeTab === 'demografi' && (
+                        <>
+                            <ChartComponent 
+                                title="Perbandingan Jenis Kelamin" 
+                                type="doughnut" 
+                                data={{
+                                    labels: jkData.map(d => d[0]),
+                                    datasets: [{ data: jkData.map(d => d[1]) }]
+                                }} 
+                                options={{ cutout: '60%' }} 
+                            />
+                            <ChartComponent 
+                                title="Sebaran Rentang Usia (Generasi)" 
+                                type="bar" 
+                                data={{
+                                    labels: generasiData.map(d => d[0]),
+                                    datasets: [{ label: 'Jumlah', data: generasiData.map(d => d[1]) }]
+                                }} 
+                            />
+                            <ChartComponent 
+                                title="Distribusi Agama" 
+                                type="bar" 
+                                data={{
+                                    labels: agamaData.map(d => d[0]),
+                                    datasets: [{ label: 'Jumlah Pegawai', data: agamaData.map(d => d[1]) }]
+                                }}
+                                options={{ indexAxis: 'y' }} // Horizontal Bar
+                            />
+                            <ChartComponent 
+                                title="Sebaran Domisili / Kecamatan" 
+                                type="polarArea" // Alternative to Treemap
+                                data={{
+                                    labels: domisiliData.map(d => d[0]),
+                                    datasets: [{ data: domisiliData.map(d => d[1]) }]
+                                }} 
+                            />
+                        </>
+                    )}
+
+                    {/* --- KATEGORI 2: KEPEGAWAIAN --- */}
+                    {activeTab === 'kepegawaian' && (
+                        <>
+                            <ChartComponent 
+                                title="Proporsi Status Kepegawaian" 
+                                type="pie" 
+                                data={{
+                                    labels: statusPegawaiData.map(d => d[0]),
+                                    datasets: [{ data: statusPegawaiData.map(d => d[1]) }]
+                                }} 
+                            />
+                            <ChartComponent 
+                                title="Distribusi Jenjang Pangkat / Golongan" 
+                                type="bar" 
+                                data={{
+                                    labels: pangkatData.map(d => d[0]),
+                                    datasets: [{ label: 'Jumlah Pegawai', data: pangkatData.map(d => d[1]) }]
+                                }} 
+                                options={{
+                                    scales: {
+                                        y: { beginAtZero: true }
+                                    }
+                                }}
+                            />
+                            <ChartComponent 
+                                title="Perbandingan Kategori Jabatan" 
+                                type="bar" // Alternative to Funnel for better legibility
+                                data={{
+                                    labels: jabatanData.map(d => d[0]),
+                                    datasets: [{ label: 'Jumlah', data: jabatanData.map(d => d[1]) }]
+                                }} 
+                                options={{ indexAxis: 'y' }}
+                            />
+                            <ChartComponent 
+                                title="Beban SDM per Unit Kerja" 
+                                type="bar" 
+                                data={{
+                                    labels: unitKerjaData.map(d => d[0]),
+                                    datasets: [{ label: 'Jumlah SDM', data: unitKerjaData.map(d => d[1]) }]
+                                }} 
+                                options={{ indexAxis: 'y' }}
+                            />
+                        </>
+                    )}
+
+                    {/* --- KATEGORI 3: FINANSIAL --- */}
+                    {activeTab === 'finansial' && (
+                        <>
+                            <ChartComponent 
+                                title="Distribusi Rentang Gaji Pokok" 
+                                type="bar" 
+                                data={{
+                                    labels: Object.keys(salaryRanges),
+                                    datasets: [{ 
+                                        label: 'Jumlah Pegawai', 
+                                        data: Object.values(salaryRanges),
+                                        backgroundColor: 'rgba(16, 185, 129, 0.8)' // Emerald for money
+                                    }]
+                                }} 
+                            />
+                            <ChartComponent 
+                                title="Konsistensi Gaji vs Pangkat" 
+                                type="scatter" 
+                                data={{
+                                    datasets: [{
+                                        label: 'Gaji Pokok',
+                                        data: scatterDataRaw,
+                                        backgroundColor: 'rgba(147, 51, 234, 0.6)'
+                                    }]
+                                }}
+                                options={{
+                                    scales: {
+                                        x: {
+                                            title: { display: true, text: 'Tingkat Pangkat (Rendah -> Tinggi)' },
+                                            ticks: { stepSize: 1 }
+                                        },
+                                        y: {
+                                            title: { display: true, text: 'Gaji Pokok (Rp)' },
+                                            ticks: { callback: (value) => 'Rp ' + (value/1000000) + ' Jt' }
+                                        }
+                                    },
+                                    plugins: {
+                                        tooltip: {
+                                            callbacks: {
+                                                label: (ctx) => {
+                                                    const data = ctx.raw;
+                                                    return `Pangkat: ${data.pangkatLabel}, Gaji: Rp ${data.y.toLocaleString('id-ID')}`;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }} 
+                            />
+                        </>
+                    )}
+
+                    {/* --- KATEGORI 4: KELUARGA --- */}
+                    {activeTab === 'keluarga' && (
+                        <>
+                            <ChartComponent 
+                                title="Status Perkawinan" 
+                                type="pie" 
+                                data={{
+                                    labels: kawinData.map(d => d[0]),
+                                    datasets: [{ data: kawinData.map(d => d[1]) }]
+                                }} 
+                            />
+                            <ChartComponent 
+                                title="Rata-rata Jumlah Anak per Pegawai" 
+                                type="bar" 
+                                data={{
+                                    labels: jmlAnakData.map(d => `${d[0]} Anak`),
+                                    datasets: [{ label: 'Frekuensi', data: jmlAnakData.map(d => d[1]) }]
+                                }} 
+                            />
+                            <div className="md:col-span-2">
+                                <ChartComponent 
+                                    title="Profil Ekonomi/Pekerjaan Pasangan" 
+                                    type="bar" 
+                                    data={{
+                                        labels: pekerjaanPasanganData.map(d => d[0]),
+                                        datasets: [{ label: 'Jumlah Pasangan', data: pekerjaanPasanganData.map(d => d[1]) }]
+                                    }} 
+                                    options={{ indexAxis: 'y' }}
+                                />
+                            </div>
+                        </>
+                    )}
+
+                </div>
+            </main>
+        </div>
+    );
+}
